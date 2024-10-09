@@ -1,0 +1,301 @@
+---
+title: "Problem Set 1"
+author: "Jennifer Edouard"
+date: "October 6, 2024"
+date-format: long
+format: 
+  html:
+    echo: true
+    toc: true
+---
+<!--
+    beamer:
+        echo: true
+        toc: true
+        aspectratio: 169
+        theme: default
+        header-includes: \renewcommand{\tightlist}{\setlength{\itemsep}{5ex}\setlength{\parskip}{0pt}}
+            \setbeamertemplate{footline}[frame number] 
+            -->
+
+
+```{python}
+import pandas as pd
+```
+
+```{python}
+import altair as alt
+```
+
+## 1. Read in one percent sample (15 points)
+
+1.1 To help you get started, we pushed a file to the course repo called parking_tickets_one_percent.csv which gives you a one percent sample of tickets. We constructed the sample by selecting 1 ticket numbers that end in 01. How long does it take to read in this file? (Find a function to measure how long it takes the command to run. Note that everytime you run, there will be some difference in how long the code takes to run). Add an assert statement which verifies that there are 287458 rows.
+
+Sources: https://www.geeksforgeeks.org/how-to-check-the-execution-time-of-python-script/
+
+```{python}
+import time
+```
+
+```{python}
+start = time.time()
+
+base_path = r"C:\Users\jenni\OneDrive - The University of Chicago\2-Python II\Github\ppha30538_fall2024\problem_sets\ps1\data\parking_tickets_one_percent.csv"
+
+df_ps1 = pd.read_csv(base_path)
+
+end = time.time()
+
+print("It took", end - start, "seconds to read in the data file")
+```
+
+```{python}
+assert len(df_ps1) == 287458
+```
+
+1.2 Using a function in the os library calculate how many megabytes is the CSV file? Using math, how large would you predict the full data set is?
+
+Sources: https://www.geeksforgeeks.org/get-file-size-in-bytes-kb-mb-and-gb-using-python/
+
+```{python}
+import os
+```
+
+```{python}
+file_info = os.stat(base_path)
+file_size_bytes = file_info.st_size
+
+file_size_mb = file_size_bytes / (1024 * 1024)
+
+print(f"The data set is about", file_size_mb, "megabytes")
+```
+
+Knowing that the data is only from ticket numbers ending in 01 and that there are 100 possible combinations of two digits, we can estimate that this data is merely 1% of the entire dataset. I'll multiply the size of this file by 100 to get a better sense of the larger dataset
+
+```{python}
+print(f"The larger data set is about", file_size_mb * 100, "megabytes")
+```
+
+1.3 The rows on the dataset are ordered or sorted by a certain column by default. Which column? Then, subset the dataset to the first 500 rows and write a function that tests if the column is ordered.
+
+Sources: https://www.datacamp.com/tutorial/functions-python-tutorial
+
+The rows seem to be in order of the issue_date column, which is the column stating the date of the ticket issuance
+
+```{python}
+first_500_subset = df_ps1.head(500)
+```
+
+```{python}
+def ordered(data):
+    return data.is_monotonic_increasing
+
+check_yes = ordered(first_500_subset["issue_date"])
+
+if check_yes:
+    print("The ticket issuance date column is ordered.")
+else: 
+    print("The ticket issuance date column is not ordered")
+```
+
+## 2. Cleaning the data and benchmarking (15 points)
+
+2.1 How many tickets were issued in the data in 2017? How many tickets does that imply were issued in the full data in 2017? How many tickets are issued each year according to the ProPublica article? Do you think that there is a meaningful difference?
+
+```{python}
+only_2017_subset = df_ps1[df_ps1["issue_date"].str.startswith("2017")]
+
+print(f"According to our data inclduing only tickets ending in '01', in the year 2017, {len(only_2017_subset)} tickets were issued. However, this means that the estimate for all the tickets issued in 2017 is {len(only_2017_subset) * 100}. According to the ProPulica article, 'EACH YEAR, the City of Chicago issues more than 3 million tickets.' Based on that estimate, I would say there is a meaningful difference in our estimate compared to the ProPublica information.")
+```
+
+2.2 Pooling the data across all years what are the top 20 most frequent violation types?Make a bar graph to show the frequency of these ticket types. Format the graph such that the violation descriptions are legible and no words are cut off.
+
+Sources: https://stackoverflow.com/questions/53983072/arrange-bar-chart-in-ascending-descending-order & https://vega.github.io/vega/tutorials/bar-chart/ 
+
+```{python}
+#| echo: true
+#| eval: false
+pip install vega_datasets
+```
+
+```{python}
+import vega_datasets
+```
+
+```{python}
+group_violation = df_ps1.groupby("violation_description").size().reset_index(name = "count")
+group_violation = group_violation.sort_values(by = "count", ascending = False)
+
+top_20_violation = group_violation.head(20)
+```
+
+```{python}
+chart_1 = alt.Chart(top_20_violation).mark_bar().encode(
+    alt.X("violation_description", title = "Traffic Violation Description", sort = alt.EncodingSortField(field = "count", order = "descending"),
+    axis = alt.Axis(labelAngle = -30)
+    ),
+    alt.Y("count", title = "Frequency")
+).properties(
+    title = "Top 20 Most Frequently Ticketed Traffic Violations in Chicago, IL",
+    width = 800
+)
+chart_1
+```
+
+## 3. Visual Encoding (15 points)
+
+3.1 In lecture 2, we discussed how Altair thinks about categorizing data series into four different types. Which data type or types would you associate with each column in the data frame? Your response should take the form of a markdown table where each row corresponds to one of the variables in the parking tickets dataset, the first column is the variable name and the second column is the variable type or types. If you argue that a column might be associated with than one type, explain why in writing below the table
+
+| Variable Name         | Variable Type(s)      |
+|-----------------------|-----------------------|
+| ticket_number | Ordinal
+| issue_date | Temporal
+| violation_location | Nominal
+| license_plate_number | Nominal
+| license_plate_state | Nominal
+| license_plate_type | Nominal
+| zipcode | Nominal
+| violation_code | Nominal
+| violation_description | Nominal
+| unit | Nominal
+| unit_description | Nominal
+| vehicle_make | Nominal
+| fine_level1_amount | Quantitative
+| fine_level2_amount | Quantitative
+| current_amount_due | Quantitative
+| total_payments | Quantitative
+| ticket_queue | Ordinal
+| ticket_queue_date | Temporal
+| notice_level | Nominal
+| hearing_disposition | Nominal
+| notice_number | Ordinal
+| officer | Nominal
+| address | Nominal
+
+3.2 Compute the fraction of time that tickets issued to each vehicle make are marked as paid. Show the results as a bar graph. Why do you think that some vehicle makes are more or less likely to have paid tickets?
+
+```{python}
+group_vehicle_make = df_ps1[df_ps1["current_amount_due"] == "0"]
+
+group_vehicle_make = df_ps1.groupby("vehicle_make").size().reset_index(name = "count")
+
+group_vehicle_make["fraction_of_total"] = group_vehicle_make["count"] / group_vehicle_make["count"].sum()
+```
+
+```{python}
+chart_2 = alt.Chart(group_vehicle_make, width = 1200, height = 500).mark_bar().encode(
+    alt.X("vehicle_make", title = "Vehicle Make", sort = alt.EncodingSortField(field = "count", order = "descending")),
+    alt.Y("fraction_of_total", title = "Fraction of Total Tickets")
+).properties(
+    title = "Most Frequently Ticketed Vehicle Makes in Chicago, IL"
+)
+chart_2
+```
+
+I think that car models that are more likely to belong to higher income people will be paid more promptly than those with low-income. Thus, cars that are more likely to belong to low-income individuals are more likely to have an outstanding balance
+
+3.3 Make a plot for the number of tickets issued over time by adapting the Filled Step Chart example online
+
+```{python}
+df_ps1["issue_date"] = pd.to_datetime(df_ps1["issue_date"])
+```
+
+```{python}
+group_issue_date = df_ps1.groupby(df_ps1["issue_date"].astype(str).str[:10]).size().reset_index(name = "count")
+```
+
+```{python}
+import altair as alt
+
+alt.data_transformers.disable_max_rows()
+
+chart_3 = alt.Chart(group_issue_date).mark_area(
+    color="hotpink",
+    interpolate='step-after',
+    line=True
+).encode(
+   alt.X("issue_date:T", title = "Date"),
+    alt.Y("count:Q", title = "Ticket Count")
+).properties(
+    title = "Most Frequently Ticketed Vehicle Makes in Chicago, IL"
+)
+chart_3
+```
+
+3.4 Make a plot for the number of tickets issued by month and day by adapting the Annual Weather Heatmap example online.
+
+```{python}
+df_ps1["month"] = df_ps1["issue_date"].dt.month
+df_ps1["day"] = df_ps1["issue_date"].dt.day
+
+group_month_and_day = df_ps1.groupby(["month","day"]).size().reset_index(name = "count")
+```
+
+```{python}
+chart_4 = alt.Chart(group_month_and_day).mark_rect().encode(
+    alt.X("day:O").title("Day"),
+    alt.Y("month:O").title("Month"),
+    alt.Color("count:Q",title = "Number of Tickets", scale = alt.Scale(scheme = "blues")),
+    tooltip=[
+        alt.Tooltip("month:O", title="Month"),
+        alt.Tooltip("day:O", title = "Day"),
+        alt.Tooltip("count:Q", title="Number of Tickets"),
+    ]
+).properties(
+    title = "Daily Traffic Violation Tickets Issued in Chicago, IL"
+).configure_view(
+    step=13,
+    strokeWidth=0
+).configure_axis(
+    domain=False
+)
+chart_4
+```
+
+3.5 Subset to the five most common types of violations. Make a plot for the number of tickets issued over time by adapting the Lasagna Plot example online.
+
+```{python}
+
+violation_count_top_5 = df_ps1["violation_description"].value_counts().nlargest(5)
+
+top_5_violation_converted = violation_count_top_5.index.tolist()
+
+df_top_5_violations = df_ps1[df_ps1['violation_description'].isin(top_5_violation_converted)]
+
+```
+
+```{python}
+
+df_top_5_violations.loc[:, "date_only_no_time"] = df_top_5_violations["issue_date"].astype(str).str[:10]
+
+top_5_day_and_violation = df_top_5_violations.groupby(["date_only_no_time", "violation_description"]).size().reset_index(name = "count")
+
+top_5_day_and_violation['date_only_no_time'] = top_5_day_and_violation['date_only_no_time'].astype(str)
+
+```
+
+```{python}
+chart_5 = alt.Chart(top_5_day_and_violation, width = 500, height = 500).mark_rect().encode(
+    x = alt.X("date_only_no_time:O", title = "Time",
+        axis = alt.Axis(labelAngle = 0, labelOverlap = "greedy")),
+    y = alt.Y("violation_description:N", title = "Violation Description",
+       axis = alt.Axis( labelAngle = 0, labelOverlap = "greedy")),
+    color = alt.Color("count:Q", title = "Ticket Count"),
+    tooltip = [
+        alt.Tooltip("date_only_no_time:O", title = "Time"),
+        alt.Tooltip("violation_description:N", title = "Violation Description"),
+        alt.Tooltip("count:Q", title = "Ticket Count")
+    ]
+).properties(
+    title = "Top 5 Traffic Violations in Chicago,IL over time"
+    )
+chart_5
+```
+
+3.6
+
+
+
+3.7
+
+

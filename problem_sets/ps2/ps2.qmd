@@ -1,0 +1,64 @@
+---
+title: "Problem Set 2"
+author: "Jennifer Edouard"
+date: October 19, 2024
+date-format: long
+format: pdf
+---
+
+# 1. Steps to submit
+
+1. “This submission is my work alone and complies with the 30538 integrity policy.” Add
+your initials to indicate your agreement: **JE**
+2. “I have uploaded the names of anyone I worked with on the problem set here” **INSERT NAMES**
+(2 point)
+3. Late coins used this pset: **__** Late coins left after submission: **__**
+
+# 2. Data Cleaning Continued (15 Points)
+
+2.1 For each column, how many rows are NA? Write a function which returns a two column data frame where each row is a variable, the first column of the data frame is the name of each variable, and the second column of the data frame is the number of times thatthe column is NA. Test your function. Then, report the results applied to the parking tickets data frame. There are several ways to do this, but we haven’t covered them yet in class, so you will need to work independently to set this up.
+
+```{python}
+import altair as alt
+from vega_datasets import data as vega_data
+import pandas as pd
+
+base_path = r"C:\Users\jenni\OneDrive - The University of Chicago\2-Python II\Github\ppha30538_fall2024\problem_sets\ps2\data\parking_tickets_one_percent.csv"
+df_ps2 = pd.read_csv(base_path)
+```
+
+```{python}
+def return_na(data_insert):
+    counts = pd.DataFrame({
+        "Variable": data_insert.columns,
+        "NA_Count": data_insert.isna().sum().values
+    })
+    return counts
+```
+
+```{python}
+
+test_function_data = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+df_titanic = pd.read_csv(test_function_data)
+
+na_test_function = return_na(df_titanic)
+print(na_test_function.head(10))
+```
+
+```{python}
+
+na_counts_df_ps2 = return_na(df_ps2)
+print(na_counts_df_ps2)
+```
+
+2.2 Three variables are missing much more frequently than the others. Why? (Hint: look at
+some rows and read the data dictionary written by ProPublica)
+
+The three variables with the highest number of NA values are zipcode (the ZIP code associated with the vehicle registration), notice_level (This field describes the type of notice the city has sent a motorist. If the field is blank, no notice was sent.), and hearing_disposition (outcome of a hearing, either “Liable” or “Not Liable.” If the ticket was not contested this field is blank.)
+
+A lot of the tickets given were for having no registration, so it makes sense that there is also no zipcode associated with the ticket. As far as notice level, no notice would be sent if the motorist paid their dues immediately. Thus, many of these records have no value. Lastly, the hearing disposition column would only have a value if the motorist contested the ticket, and the majority did not.
+
+1.3 The City Clerk said the price increase would raise revenue by $16 million per year. For now, ignore the fact that many tickets are not paid and assume that the number of tickets issued is the same before and after the policy change. Using on the data available in the calendar year prior to the increase, how much of a revenue increase should they have projected? Remember that you are working with a one percent sample of the data.
+
+Assume that the number of tickets of this type issued afterward would be constant and you can assume that there are no late fees or collection fees, so a ticket is either paid at its face value or is never paid
+

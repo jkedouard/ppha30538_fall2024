@@ -175,7 +175,7 @@ alt.Chart(movies_url).mark_bar().encode(
 ## Case study: when are the highest grossing films?
 
 ```{python}
-movies_gross = movies[['US Gross', 'Release Date']]
+movies_gross = movies[['US_Gross', 'Release_Date']]
 movies_gross.head()
 ```
 
@@ -206,6 +206,12 @@ Hint: if you aren't sure how to aggregate the x-variable, go back to the first v
 
 3. *Share* -- discuss results as a class
 
+```{python}
+alt.Chart(movies_url).mark_area().encode(
+    alt.X('month(Release_Date):T'),
+    alt.Y('median(US_Gross):Q')
+)
+```
 
 ## Aggregation: summary
 
@@ -254,7 +260,7 @@ Why bother doing it in Altair/Vega?
 ## `calculate` case study redux: what time of year do US movies make money abroad? 
 ```{python}
 alt.Chart(movies_url).mark_area().transform_calculate(
-    NonUS_Gross='datum.Worldwide_Gross - datum.US_Gross'
+    NonUS_Gross='datum.Worldwide_Gross - datum.US_Gross' # making a new variable
 ).encode(
     alt.X('month(Release_Date):T'),
     alt.Y('median(NonUS_Gross):Q')
@@ -276,7 +282,7 @@ alt.Chart(movies_url).mark_area().transform_calculate(
 alt.Chart(movies_url).mark_circle().encode(
     alt.X('Rotten_Tomatoes_Rating:Q'),
     alt.Y('IMDB_Rating:Q')
-).transform_filter('year(datum.Release_Date) < 1970')
+).transform_filter('year(datum.Release_Date) < 1970') # filters down what shows up on the plot
 ```
 
 ## Do-pair-share
@@ -301,8 +307,8 @@ alt.Chart(movies_url).mark_bar().transform_aggregate(
     groupby=['Major_Genre'],
     Average_Rating='average(Rotten_Tomatoes_Rating)'
 ).encode(
-    alt.X('Average_Rating:Q'),
-    alt.Y('Major_Genre:N')
+    alt.X('Average_Rating:Q').title("Average Rotten Tomatoes Rating"),
+    alt.Y('Major_Genre:N').title("Film Genre")
 )
 ```
 
@@ -354,7 +360,7 @@ alt.Chart(movies_url).mark_bar().transform_aggregate(
 ).transform_filter(
     'datum.Director != null'
 ).encode(
-    alt.X('Gross:Q'),
+    alt.X('Gross:Q', axis = alt.Axis(labelAngle = 15)),
     alt.Y('Director:N', sort=alt.EncodingSortField(
         op='max', field='Gross', order='descending'
     ))

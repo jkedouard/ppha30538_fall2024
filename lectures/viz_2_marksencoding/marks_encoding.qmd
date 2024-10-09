@@ -296,11 +296,11 @@ In-class exercise: what happens if you swap the Q and the O types?
 
 ## Do not require zero on axis range 
 ```{python}
-zero_included = alt.Chart(data2000).mark_point().encode(
+zero_excluded = alt.Chart(data2000).mark_point().encode(
     alt.X('fertility:Q'),
     alt.Y('life_expect:Q')
 )
-zero_excluded = alt.Chart(data2000).mark_point().encode(
+zero_included = alt.Chart(data2000).mark_point().encode(
     alt.X('fertility:Q', scale=alt.Scale(zero=False)),
     alt.Y('life_expect:Q', scale=alt.Scale(zero=False))
 )
@@ -355,7 +355,7 @@ alt.Chart(data2000).mark_point(filled=True).encode(
     alt.Y('life_expect:Q'),
     alt.Size('pop:Q', scale=alt.Scale(range=[0,1000])),
     alt.Color('cluster:N'),
-    alt.OpacityValue(0.2)
+    alt.OpacityValue(0.5)
 )
 ```
 
@@ -391,8 +391,21 @@ alt.Chart(data2000).mark_point(filled=True).encode(
 
 The plot faceted by column doesn't fit on the page. Redo it instead faceted by row.
 
-Bonus: It still looks bad. What further change is needed?
+```{python}
+alt.Chart(data2000).mark_point(filled=True).encode(
+    alt.X('fertility:Q'),
+    alt.Y('life_expect:Q'),
+    alt.Size('pop:Q', scale=alt.Scale(range=[0,1000]),
+             legend=alt.Legend(orient='right', titleOrient='left')),
+    alt.Color('cluster:N', legend=None),
+    alt.OpacityValue(0.5),
+    alt.Tooltip('country:N'),
+    alt.Row('cluster:N')
+).properties(width=135, height=135)
+```
 
+Bonus: It still looks bad. What further change is needed?
+Answer: the legend also needs to instead be organized by row
 
 ## Encoding channels: summary
 
@@ -495,6 +508,14 @@ alt.Chart(data2000).mark_bar().encode(
 ```
 
 Note: if we had instead set `alt.Y('pop:Q', stack=None)`, bars would have been overlapped with each other
+
+```{python}
+alt.Chart(data2000).mark_bar().encode(
+    alt.X('cluster:N'),
+    alt.Y('pop:Q', stack = None),
+    alt.Color('country:N', legend=None) 
+)
+```
 
 ## `X2()` to show intervals
 
