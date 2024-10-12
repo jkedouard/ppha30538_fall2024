@@ -58,7 +58,6 @@ The three variables with the highest number of NA values are zipcode (the ZIP co
 
 A lot of the tickets given were for having no registration, so it makes sense that there is also no zipcode associated with the ticket. As far as notice level, no notice would be sent if the motorist paid their dues immediately. Thus, many of these records have no value. Lastly, the hearing disposition column would only have a value if the motorist contested the ticket, and the majority did not.
 
-1.3 The City Clerk said the price increase would raise revenue by $16 million per year. For now, ignore the fact that many tickets are not paid and assume that the number of tickets issued is the same before and after the policy change. Using on the data available in the calendar year prior to the increase, how much of a revenue increase should they have projected? Remember that you are working with a one percent sample of the data.
+2.3 Some of the other articles on propublica website discuss an increase in the dollar amount of the ticket for not having a city sticker. What was the old violation code and what is the new violation code?
 
-Assume that the number of tickets of this type issued afterward would be constant and you can assume that there are no late fees or collection fees, so a ticket is either paid at its face value or is never paid
 
