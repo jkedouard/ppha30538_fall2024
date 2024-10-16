@@ -76,9 +76,9 @@ print(subset_no_city_sticker.tail(5))
 ```{python}
 subset_no_city_sticker_2 = df_ps2[df_ps2["violation_description"].str.startswith("NO CITY STICKER")]["fine_level1_amount"]
 
-print(subset_no_city_sticker_2.head(5))
+print(subset_no_city_sticker_2.head(1))
 
-print(subset_no_city_sticker_2.tail(5))
+print(subset_no_city_sticker_2.tail(1))
 ```
 
 # 2 Revenue increase from "missing city sticker" tickets (20 Points)

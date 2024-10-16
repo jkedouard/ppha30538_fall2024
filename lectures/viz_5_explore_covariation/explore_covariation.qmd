@@ -291,6 +291,14 @@ We are now going to transition from making plots to teach **ourselves** to makin
 
 Are penguins getting heavier (`body_mass_g`) over time? 
 
+```{python}
+alt.Chart(penguins).mark_rect().encode(
+    alt.X('year:O'),
+    alt.Y('body_mass_g:Q', bin=alt.BinParams(maxbins = 25)),
+    alt.Color('count()', scale=alt.Scale(scheme='tealblues'))
+)
+```
+
 Bonus: what is the headline of your plot and what are the sub-messages?
 
 ## Meta comment: iterating on plot design
